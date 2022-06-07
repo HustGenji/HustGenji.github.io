@@ -1,0 +1,67 @@
+# ---
+# title: tags
+# date: 2019-11-12 23:03:05
+# type: "tags"
+# ---
+今天主要看了链表的一些东西，每日一题里涉及到的动态规划暂时还没有搞得很清楚，晚点再来写。这次主要写双指针技巧。
+## 题目
+#### [141.环形链表](https://leetcode-cn.com/problems/linked-list-cycle/)
+```
+    给定一个链表，判断链表中是否有环。
+    为了表示给定链表中的环，我们使用整数 pos 来表示链表尾连接到链表中的位置（索引从 0 开始）。 
+    如果 pos 是 -1，则在该链表中没有环。
+
+    示例1：
+        输入：head = [3,2,0,-4], pos = 1
+        输出：true
+        解释：链表中有一个环，其尾部连接到第二个节点。
+    示例2：
+        输入：head = [1,2], pos = 0
+        输出：true
+        解释：链表中有一个环，其尾部连接到第一个节点。
+```
+* 题目很好懂，只需要判断这个链表是否是环形链表，即尾结点是否指向了链表中的某一个节点。这里使用双指针，即一个快指针和一个慢指针同时重复遍历整个链表，如果两个指针相遇了，<!--more-->那么这个链表一定是环形链表。这类似于在操场上跑步，因为操场是圆的，跑的快的同学总会追上跑得慢的同学。
+    ```cpp
+    class Solution {
+    public:
+        bool hasCycle(ListNode *head) {
+            ListNode* faster{head};
+            ListNode* slower{head};
+            if(head == NULL) return false;\\如果链表为空，直接返回false
+            while(faster != NULL && faster->next != NULL) {
+                faster = faster->next->next;
+                slower = slower->next;
+                if(faster == slower) return true;
+            }
+            return false;
+        }
+    };
+    ```
+* 下面是一个延申的题目，需要用到一些巧妙的数学关系。
+### [142.环形链表II](https://leetcode-cn.com/problems/linked-list-cycle-ii/)
+* 在上个题目的基础上，需要返回环的第一个节点（索引从0开始）。
+* 首先需要分析数学关系，假设非环部分长度为x，环长度为y，环开始到两节点相遇的位置的长度为z（两节点一定在环上相遇）。那么慢指针走过的长度一定是```x+z+n*y```,快指针长度为```2*(x+z+n*y)```。而两个指针路程之差一定等于环长度的整数倍，即```x+z+n*y=m*y```。得到```x+z=(m-n)*y```。
+* 则两指针相遇后，把快指针初始化到头节点，两指针再行进相同的长度，一定相遇在环起点。因为头指针到换起点的距离是x，而在相遇点再新进x个长度也刚好完成了一个环的长度。其中一个指针初始化后再与另外一个指针相遇，返回的指针即是环开始的节点。有了这个思想，算法就不难实现。
+    ```cpp
+    class Solution {
+    public:
+        ListNode *detectCycle(ListNode *head) {
+            ListNode* fast = head;
+            ListNode* slow = head;
+            while(fast != NULL && fast->next != NULL) {
+                fast = fast->next->next;
+                slow = slow->next;
+                if(fast == slow) {
+                    fast = head;
+                    while(fast != slow) {
+                        fast = fast->next;
+                        slow = slow->next;
+                    }
+                    return fast;
+                    break;
+                }
+            }
+            return nullptr;
+        }
+    };
+    ```
